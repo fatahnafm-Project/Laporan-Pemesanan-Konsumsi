@@ -59,6 +59,10 @@
             <button onclick="tambahBaris('non')" class="bg-emerald-600 text-white px-4 py-2 rounded font-bold text-sm">+ Baris Non-Prasmanan</button>
             <button onclick="downloadJPG()" class="bg-slate-800 text-white px-6 py-2 rounded font-bold text-sm ml-auto italic">Download JPG (A4)</button>
         </div>
+        <div class="mt-4">
+            <label class="block text-xs font-bold text-slate-500 mb-1 italic">Isi Catatan (Note):</label>
+            <textarea id="i_note" oninput="rev()" class="w-full border p-2 rounded text-sm" rows="3" placeholder="Masukkan keterangan tambahan di sini..."></textarea>
+        </div>
     </div>
 
     <div id="canvas-area">
@@ -132,12 +136,12 @@
             </div>
         </div>
 
-        <div class="mt-auto">
-            <p class="font-bold mb-1">Note:</p>
-            <div class="border-b border-black w-full h-8 mb-2"></div>
-            <div class="border-b border-black w-full h-8 mb-2"></div>
-            <div class="border-b border-black w-full h-8 mb-2"></div>
-        </div>
+        <div class="mt-6">
+            <p class="font-bold text-xs mb-1 italic">Note:</p>
+            <div id="v_note" class="text-sm p-2 min-h-[100px] border border-slate-300 rounded whitespace-pre-wrap"></div>
+            <div class="line-note"></div>
+            <div class="line-note"></div>
+</div>
     </div>
 
     <script>
@@ -145,11 +149,14 @@
         let dataNon = [];
 
         function updatePreview() {
-            document.getElementById('v_gs').innerText = document.getElementById('in_gs').value;
-            document.getElementById('v_kmi').innerText = document.getElementById('in_kmi').value;
-            document.getElementById('v_santri').innerText = document.getElementById('in_santri').value;
-            document.getElementById('v_pim').innerText = document.getElementById('in_pim').value;
-            document.getElementById('v_dir').innerText = document.getElementById('in_dir').value;
+    // Data Tamu
+            document.getElementById('v_gs').innerText = document.getElementById('i_gs').value;
+            document.getElementById('v_kmi').innerText = document.getElementById('i_kmi').value;
+            document.getElementById('v_san').innerText = document.getElementById('i_san').value;
+            document.getElementById('v_pim').innerText = document.getElementById('i_pim').value;
+            document.getElementById('v_dir').innerText = document.getElementById('i_dir').value;
+    // Fitur Baru: Update Catatan (Note)
+            document.getElementById('v_note').innerText = document.getElementById('i_note').value;
             renderTables();
         }
 
