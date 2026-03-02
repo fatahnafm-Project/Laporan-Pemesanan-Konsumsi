@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Laporan Konsumsi JPG</title>
+    <title>Generator Laporan Konsumsi JPG v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -13,6 +13,7 @@
         #canvas-area {
             width: 210mm;
             min-height: 297mm;
+            /* Padding atas 0 agar kop mepet */
             padding: 0 15mm 15mm 15mm;
             margin: auto;
             background: white;
@@ -20,6 +21,7 @@
         }
 
         .input-section { font-family: 'Inter', sans-serif; }
+        .line-note { border-bottom: 1px solid black; height: 30px; margin-bottom: 5px; }
         
         @media print {
             .no-print { display: none; }
@@ -31,63 +33,64 @@
     <div class="max-w-4xl mx-auto mb-10 p-6 bg-white rounded-xl shadow-lg no-print input-section">
         <h2 class="text-xl font-bold mb-4 border-b pb-2 text-slate-800">Panel Kontrol Laporan</h2>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Guru Senior</label>
-                <input type="number" oninput="updatePreview()" id="in_gs" class="w-full border p-2 rounded" value="0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Guru Senior</label>
+                <input type="number" oninput="updatePreview()" id="in_gs" class="w-full border p-2 rounded text-sm" value="0">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Guru KMI</label>
-                <input type="number" oninput="updatePreview()" id="in_kmi" class="w-full border p-2 rounded" value="0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Guru KMI</label>
+                <input type="number" oninput="updatePreview()" id="in_kmi" class="w-full border p-2 rounded text-sm" value="0">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Santri / Capel</label>
-                <input type="number" oninput="updatePreview()" id="in_santri" class="w-full border p-2 rounded" value="0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Santri/Capel</label>
+                <input type="number" oninput="updatePreview()" id="in_santri" class="w-full border p-2 rounded text-sm" value="0">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Bapak Pimpinan</label>
-                <input type="number" oninput="updatePreview()" id="in_pim" class="w-full border p-2 rounded" value="0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Bapak Pimpinan</label>
+                <input type="number" oninput="updatePreview()" id="in_pim" class="w-full border p-2 rounded text-sm" value="0">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Direktur</label>
-                <input type="number" oninput="updatePreview()" id="in_dir" class="w-full border p-2 rounded" value="0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase">Direktur KMI</label>
+                <input type="number" oninput="updatePreview()" id="in_dir" class="w-full border p-2 rounded text-sm" value="0">
             </div>
         </div>
 
-        <div class="flex gap-4">
-            <button onclick="tambahBaris('prasmanan')" class="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm">+ Baris Prasmanan</button>
-            <button onclick="tambahBaris('non')" class="bg-emerald-600 text-white px-4 py-2 rounded font-bold text-sm">+ Baris Non-Prasmanan</button>
-            <button onclick="downloadJPG()" class="bg-slate-800 text-white px-6 py-2 rounded font-bold text-sm ml-auto italic">Download JPG (A4)</button>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <button onclick="tambahBaris('prasmanan')" class="bg-blue-600 text-white px-4 py-2 rounded font-bold text-xs hover:bg-blue-700 transition">+ BARIS PRASMANAN</button>
+            <button onclick="tambahBaris('non')" class="bg-emerald-600 text-white px-4 py-2 rounded font-bold text-xs hover:bg-emerald-700 transition">+ BARIS NON-PRASMANAN</button>
+            <button onclick="downloadJPG()" class="bg-slate-800 text-white px-6 py-2 rounded font-bold text-xs ml-auto hover:bg-black transition">DOWNLOAD JPG (A4)</button>
         </div>
-        <div class="mt-4">
-            <label class="block text-xs font-bold text-slate-500 mb-1 italic">Isi Catatan (Note):</label>
-            <textarea id="i_note" oninput="rev()" class="w-full border p-2 rounded text-sm" rows="3" placeholder="Masukkan keterangan tambahan di sini..."></textarea>
+
+        <div class="mt-4 border-t pt-4">
+            <label class="block text-xs font-bold text-slate-500 mb-1 italic">Isi Catatan (Note) untuk Laporan:</label>
+            <textarea id="i_note" oninput="updatePreview()" class="w-full border p-2 rounded text-sm focus:ring-2 ring-blue-500 outline-none" rows="3" placeholder="Contoh: Pembayaran dilakukan via bendahara..."></textarea>
         </div>
     </div>
 
     <div id="canvas-area">
-        <div>
+        <div class="mb-6">
             <img src="kopfix.jpg" 
                  alt="Kop Surat Student Admission Committee" 
                  style="width: 100%; height: auto; display: block;">
-         </div>
+        </div>
 
         <h2 class="text-center text-xl font-bold underline mb-8">LAPORAN PEMESANAN KONSUMSI</h2>
 
         <div class="mb-8">
-            <h3 class="font-bold mb-2">I. DATA TAMU UNDANGAN (KEHADIRAN)</h3>
+            <h3 class="font-bold mb-2 uppercase text-sm italic">I. Data Tamu Undangan (Kehadiran)</h3>
             <table class="w-full border-collapse border border-black text-sm">
                 <thead>
                     <tr class="bg-gray-100">
                         <th class="border border-black p-2">Guru Senior</th>
                         <th class="border border-black p-2">Guru KMI</th>
                         <th class="border border-black p-2">Santri/Capel</th>
-                        <th class="border border-black p-2">Bapak Direktur KMI</th>
                         <th class="border border-black p-2">Bapak Pimpinan</th>
+                        <th class="border border-black p-2">Direktur KMI</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="text-center">
+                    <tr class="text-center font-bold">
                         <td class="border border-black p-2" id="v_gs">0</td>
                         <td class="border border-black p-2" id="v_kmi">0</td>
                         <td class="border border-black p-2" id="v_santri">0</td>
@@ -99,65 +102,69 @@
         </div>
 
         <div class="mb-6">
-            <h3 class="font-bold mb-2 uppercase">II. Jenis Pesanan : Prasmanan</h3>
+            <h3 class="font-bold mb-2 uppercase text-sm italic">II. Jenis Pesanan : Prasmanan</h3>
             <table class="w-full border-collapse border border-black text-sm">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 uppercase text-[10px]">
                     <tr>
                         <th class="border border-black p-1 w-10">No.</th>
                         <th class="border border-black p-1">Item Makanan</th>
-                        <th class="border border-black p-1">Jumlah</th>
-                        <th class="border border-black p-1">Harga Satuan</th>
-                        <th class="border border-black p-1 text-right">Total</th>
+                        <th class="border border-black p-1 w-20">Jumlah</th>
+                        <th class="border border-black p-1 w-32">Harga Satuan</th>
+                        <th class="border border-black p-1 w-32 text-right">Total</th>
                     </tr>
                 </thead>
-                <tbody id="v_body_prasmanan"></tbody>
+                <tbody id="v_body_prasmanan">
+                    </tbody>
             </table>
         </div>
 
         <div class="mb-6">
-            <h3 class="font-bold mb-2 uppercase">III. Jenis Pesanan : Non-Prasmanan</h3>
+            <h3 class="font-bold mb-2 uppercase text-sm italic">III. Jenis Pesanan : Non-Prasmanan</h3>
             <table class="w-full border-collapse border border-black text-sm">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 uppercase text-[10px]">
                     <tr>
                         <th class="border border-black p-1 w-10">No.</th>
                         <th class="border border-black p-1">Item Makanan</th>
-                        <th class="border border-black p-1">Jumlah</th>
-                        <th class="border border-black p-1">Harga Satuan</th>
-                        <th class="border border-black p-1 text-right">Total</th>
+                        <th class="border border-black p-1 w-20">Jumlah</th>
+                        <th class="border border-black p-1 w-32">Harga Satuan</th>
+                        <th class="border border-black p-1 w-32 text-right">Total</th>
                     </tr>
                 </thead>
-                <tbody id="v_body_non"></tbody>
+                <tbody id="v_body_non">
+                    </tbody>
             </table>
         </div>
 
         <div class="flex justify-end mb-10">
-            <div class="w-1/2 border-t-2 border-black pt-2 text-right font-bold">
-                TOTAL AKUMULASI KESELURUHAN: <span class="text-lg ml-4" id="v_grand_total">Rp 0</span>
+            <div class="w-2/3 border-t-2 border-black pt-2 text-right font-bold text-base uppercase">
+                Total Akumulasi Keseluruhan: <span class="text-xl ml-4" id="v_grand_total">Rp 0</span>
             </div>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-auto">
             <p class="font-bold text-xs mb-1 italic">Note:</p>
-            <div id="v_note" class="text-sm p-2 min-h-[100px] border border-slate-300 rounded whitespace-pre-wrap"></div>
+            <div id="v_note" class="text-sm p-2 mb-2 whitespace-pre-wrap min-h-[20px]"></div>
             <div class="line-note"></div>
             <div class="line-note"></div>
-</div>
+            <div class="line-note"></div>
+        </div>
     </div>
 
     <script>
         let dataPrasmanan = [];
         let dataNon = [];
 
-         function rev() {
-    // Data Tamu
-            document.getElementById('v_gs').innerText = document.getElementById('i_gs').value;
-            document.getElementById('v_kmi').innerText = document.getElementById('i_kmi').value;
-            document.getElementById('v_san').innerText = document.getElementById('i_san').value;
-            document.getElementById('v_pim').innerText = document.getElementById('i_pim').value;
-            document.getElementById('v_dir').innerText = document.getElementById('i_dir').value;
-    // Fitur Baru: Update Catatan (Note)
+        // Fungsi sinkronisasi input ke tampilan laporan
+        function updatePreview() {
+            // Update Data Tamu
+            document.getElementById('v_gs').innerText = document.getElementById('in_gs').value || 0;
+            document.getElementById('v_kmi').innerText = document.getElementById('in_kmi').value || 0;
+            document.getElementById('v_santri').innerText = document.getElementById('in_santri').value || 0;
+            document.getElementById('v_pim').innerText = document.getElementById('in_pim').value || 0;
+            document.getElementById('v_dir').innerText = document.getElementById('in_dir').value || 0;
+            
+            // Update Note
             document.getElementById('v_note').innerText = document.getElementById('i_note').value;
-            }
         }
 
         function tambahBaris(kategori) {
@@ -166,7 +173,10 @@
             const jumlah = prompt("Jumlah/Kuantitas:", "0");
             const harga = prompt("Harga Satuan (Angka saja):", "0");
             
-            const obj = { item, jumlah: parseInt(jumlah), harga: parseInt(harga), total: parseInt(jumlah) * parseInt(harga) };
+            const qty = parseInt(jumlah) || 0;
+            const prc = parseInt(harga) || 0;
+            
+            const obj = { item, jumlah: qty, harga: prc, total: qty * prc };
             
             if(kategori === 'prasmanan') dataPrasmanan.push(obj);
             else dataNon.push(obj);
@@ -182,7 +192,7 @@
                 arr.forEach((d, i) => {
                     subtotal += d.total;
                     body.innerHTML += `
-                        <tr>
+                        <tr class="hover:bg-gray-50">
                             <td class="border border-black p-1 text-center">${i+1}</td>
                             <td class="border border-black p-1">${d.item}</td>
                             <td class="border border-black p-1 text-center">${d.jumlah}</td>
@@ -202,11 +212,19 @@
 
         function downloadJPG() {
             const area = document.getElementById('canvas-area');
-            html2canvas(area, { scale: 2 }).then(canvas => {
+            // Menghilangkan bayangan saat proses download agar gambar bersih
+            area.style.boxShadow = "none";
+            
+            html2canvas(area, { 
+                scale: 3, // Skala tinggi untuk kualitas cetak tajam
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Laporan_Konsumsi_A4.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.download = 'Laporan_Konsumsi_Final.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
                 link.click();
+                area.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)"; // Munculkan bayangan kembali
             });
         }
     </script>
