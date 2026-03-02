@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Laporan Konsumsi JPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { background-color: #475569; font-family: 'Times New Roman', serif; }
+        
+        /* Simulai Ukuran A4 */
+        #canvas-area {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .input-section { font-family: 'Inter', sans-serif; }
+        
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body class="py-10">
+
+    <div class="max-w-4xl mx-auto mb-10 p-6 bg-white rounded-xl shadow-lg no-print input-section">
+        <h2 class="text-xl font-bold mb-4 border-b pb-2 text-slate-800">Panel Kontrol Laporan</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Guru Senior</label>
+                <input type="number" oninput="updatePreview()" id="in_gs" class="w-full border p-2 rounded" value="0">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Guru KMI</label>
+                <input type="number" oninput="updatePreview()" id="in_kmi" class="w-full border p-2 rounded" value="0">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Santri / Capel</label>
+                <input type="number" oninput="updatePreview()" id="in_santri" class="w-full border p-2 rounded" value="0">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Bapak Pimpinan</label>
+                <input type="number" oninput="updatePreview()" id="in_pim" class="w-full border p-2 rounded" value="0">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Direktur</label>
+                <input type="number" oninput="updatePreview()" id="in_dir" class="w-full border p-2 rounded" value="0">
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <button onclick="tambahBaris('prasmanan')" class="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm">+ Baris Prasmanan</button>
+            <button onclick="tambahBaris('non')" class="bg-emerald-600 text-white px-4 py-2 rounded font-bold text-sm">+ Baris Non-Prasmanan</button>
+            <button onclick="downloadJPG()" class="bg-slate-800 text-white px-6 py-2 rounded font-bold text-sm ml-auto italic">Download JPG (A4)</button>
+        </div>
+    </div>
+
+    <div id="canvas-area">
+        <div class="text-center border-b-4 border-double border-black pb-4 mb-6">
+            <h1 class="text-2xl font-bold uppercase">Panitia Ujian Masuk Panjima</h1>
+            <p class="text-sm">Jl. Pendidikan No. 123, Komplek Pesantren Modern</p>
+            <p class="text-xs italic">Email: panitia@panjima.ac.id | Telp: (021) 1234567</p>
+        </div>
+
+        <h2 class="text-center text-xl font-bold underline mb-8">LAPORAN PEMESANAN KONSUMSI</h2>
+
+        <div class="mb-8">
+            <h3 class="font-bold mb-2">I. DATA TAMU UNDANGAN (KEHADIRAN)</h3>
+            <table class="w-full border-collapse border border-black text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-black p-2">Guru Senior</th>
+                        <th class="border border-black p-2">Guru KMI</th>
+                        <th class="border border-black p-2">Santri/Capel</th>
+                        <th class="border border-black p-2">Bapak Pimpinan</th>
+                        <th class="border border-black p-2">Direktur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="text-center">
+                        <td class="border border-black p-2" id="v_gs">0</td>
+                        <td class="border border-black p-2" id="v_kmi">0</td>
+                        <td class="border border-black p-2" id="v_santri">0</td>
+                        <td class="border border-black p-2" id="v_pim">0</td>
+                        <td class="border border-black p-2" id="v_dir">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="font-bold mb-2 uppercase">II. Jenis Pesanan : Prasmanan</h3>
+            <table class="w-full border-collapse border border-black text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="border border-black p-1 w-10">No.</th>
+                        <th class="border border-black p-1">Item Makanan</th>
+                        <th class="border border-black p-1">Jumlah</th>
+                        <th class="border border-black p-1">Harga Satuan</th>
+                        <th class="border border-black p-1 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="v_body_prasmanan"></tbody>
+            </table>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="font-bold mb-2 uppercase">III. Jenis Pesanan : Non-Prasmanan</h3>
+            <table class="w-full border-collapse border border-black text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="border border-black p-1 w-10">No.</th>
+                        <th class="border border-black p-1">Item Makanan</th>
+                        <th class="border border-black p-1">Jumlah</th>
+                        <th class="border border-black p-1">Harga Satuan</th>
+                        <th class="border border-black p-1 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="v_body_non"></tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-end mb-10">
+            <div class="w-1/2 border-t-2 border-black pt-2 text-right font-bold">
+                TOTAL AKUMULASI KESELURUHAN: <span class="text-lg ml-4" id="v_grand_total">Rp 0</span>
+            </div>
+        </div>
+
+        <div class="mt-auto">
+            <p class="font-bold mb-1">Note:</p>
+            <div class="border-b border-black w-full h-8 mb-2"></div>
+            <div class="border-b border-black w-full h-8 mb-2"></div>
+            <div class="border-b border-black w-full h-8 mb-2"></div>
+        </div>
+    </div>
+
+    <script>
+        let dataPrasmanan = [];
+        let dataNon = [];
+
+        function updatePreview() {
+            document.getElementById('v_gs').innerText = document.getElementById('in_gs').value;
+            document.getElementById('v_kmi').innerText = document.getElementById('in_kmi').value;
+            document.getElementById('v_santri').innerText = document.getElementById('in_santri').value;
+            document.getElementById('v_pim').innerText = document.getElementById('in_pim').value;
+            document.getElementById('v_dir').innerText = document.getElementById('in_dir').value;
+            renderTables();
+        }
+
+        function tambahBaris(kategori) {
+            const item = prompt("Nama Item Makanan:");
+            if(!item) return;
+            const jumlah = prompt("Jumlah/Kuantitas:", "0");
+            const harga = prompt("Harga Satuan (Angka saja):", "0");
+            
+            const obj = { item, jumlah: parseInt(jumlah), harga: parseInt(harga), total: parseInt(jumlah) * parseInt(harga) };
+            
+            if(kategori === 'prasmanan') dataPrasmanan.push(obj);
+            else dataNon.push(obj);
+            
+            renderTables();
+        }
+
+        function renderTables() {
+            const render = (arr, id) => {
+                const body = document.getElementById(id);
+                body.innerHTML = "";
+                let subtotal = 0;
+                arr.forEach((d, i) => {
+                    subtotal += d.total;
+                    body.innerHTML += `
+                        <tr>
+                            <td class="border border-black p-1 text-center">${i+1}</td>
+                            <td class="border border-black p-1">${d.item}</td>
+                            <td class="border border-black p-1 text-center">${d.jumlah}</td>
+                            <td class="border border-black p-1">Rp ${d.harga.toLocaleString()}</td>
+                            <td class="border border-black p-1 text-right font-bold">Rp ${d.total.toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+                return subtotal;
+            };
+
+            const t1 = render(dataPrasmanan, 'v_body_prasmanan');
+            const t2 = render(dataNon, 'v_body_non');
+            
+            document.getElementById('v_grand_total').innerText = "Rp " + (t1 + t2).toLocaleString();
+        }
+
+        function downloadJPG() {
+            const area = document.getElementById('canvas-area');
+            html2canvas(area, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Laporan_Konsumsi_A4.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
